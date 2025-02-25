@@ -1,0 +1,20 @@
+{
+    "params":{
+        "local_server":"True",
+        "local_url":"mysql+pymysql://root:@localhost/clean_blog",
+        "prod_url":"mysql+pymysql://root:@localhost/clean_blog",
+        "secret_key":"8sfsfsfs8sfsfsfsf8sfksansna",
+        "SQLALCHEMY_TRACK_MODIFICATIONS":"False",
+        "github_link":"https://github.com/ndk123-web/blog",
+        "blog_name":"TechTales",
+        "tag_name":"Code. Create. Innovate.",
+        "gmail-username":"navnathkadam284@gmail.com",
+
+        "gmail-password":"rvhygdnqpafefajh",
+        
+        "gmail-port":"465",
+        "gmail-server":"smtp.gmail.com",
+        "gmail-ssl":"True",
+        "gmail-tsl":"False"
+    }
+}
