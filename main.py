@@ -1,7 +1,7 @@
 from flask import Flask # flask meise Flask class ko import kiya
 from flask import render_template # import render_template to render 
 from flask_sqlalchemy import SQLAlchemy
-from flask import request , jsonify , flash , redirect , url_for
+from flask import request , jsonify , flash , redirect , url_for , session
 import json 
 from flask_mail import Mail
 
@@ -41,15 +41,31 @@ class Contacts(db.Model):
     msg = db.Column(db.String(100),nullable=False)
     date = db.Column(db.String(12)) 
 
+class Posts(db.Model):
+    sno = db.Column(db.Integer,primary_key=True) 
+    title = db.Column(db.String(80),nullable=False) 
+    slug = db.Column(db.String(21), nullable=False) 
+    content= db.Column(db.String(100),nullable=False)
+    img_url= db.Column(db.String(100),nullable=False)
+    date = db.Column(db.String(12)) 
+    sub_heading = db.Column(db.String(50) , nullable = False )
+    
+class User(db.Model):
+    sno = db.Column(db.Integer,primary_key=True) 
+    username = db.Column(db.String(80),nullable=False) 
+    password = db.Column(db.String(100), nullable=False) 
+    date = db.Column(db.String(12)) 
+
 # actually it creates table if doesn't exist
-with app.app_context():
-    db.create_all()  # only using db.create_all() get error context required 
+with app.app_context(): # only using db.create_all() get error context required 
+    db.create_all()  # only using this we can create above all tables and if not then creates if exist then column must match
 
 @app.route('/')
 def home():
-    return render_template("index.html",params=params)
+    posts = Posts.query.filter_by().all()[0:int(params['no_of_posts'])]
+    return render_template("index.html",params=params,one_post={},posts = posts)
 
-@app.route('/contact',methods=['GET','POST'])
+@app.route('/contact/',methods=['GET','POST'])
 def contact():
     if request.method == 'POST':
         name = request.form.get('name') 
@@ -78,17 +94,48 @@ def contact():
                           )
         
         flash("Your message is successfully sends","success")  # flash to show messages
-        return redirect('contact')  
         
-    return render_template("contact.html",params=params)
+    return render_template("contact.html",params=params,one_post={})
 
-@app.route('/about')
+@app.route('/about/')
 def about():
-    return render_template('about.html',params=params)
+    return render_template('about.html',params=params,one_post={})
 
-@app.route('/post')
-def post():
-    return render_template('post.html',params=params)
+@app.route('/post/')
+def normal_post():
+    return render_template('post.html',params=params,one_post={})
+
+
+@app.route('/post/<string:post_slug>', methods=['GET'])
+def post(post_slug):
+    one_post = Posts.query.filter_by(slug=post_slug).first()  # ✅ Single post fetch kar rahe hai
+    if not one_post:
+        return "Post not found", 404  # ✅ Agar post nahi mili to error return kare
+    return render_template('post.html', params=params, one_post=one_post)  # ✅ Correct variable pass ho raha hai
+
+@app.route('/admin_dashboard/',methods=['GET'])
+def admin_dashboard():
+    return render_template('admin_dashboard.html',params=params)
+
+@app.route('/login/',methods=['GET','POST'])
+def login():
+    
+    posts = Posts.query.all()
+    
+    # when if 'user' ke is already in cookie then it will immediately redirects to the home 
+    if 'user' in session:        
+        return render_template('admin_dashboard.html',params=params,posts=posts)
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username == params['admin_username'] and password == params['admin_password']:
+            session['user'] = 'admin'
+            return render_template('admin_dashboard.html',params=params,posts=posts)        
+        else:
+            flash('U are not admin','danger')
+    
+    return render_template('login.html',params=params)
 
 if __name__ == '__main__':
     app.run(debug=True)

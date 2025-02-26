@@ -9,8 +9,16 @@
 6.  "entry = Contacts(name=name,phone_num=phone, email=email, ,msg=message )" , this are imporatant so that we create row instance
 7.  using "session.add(entry) " we temporary stores in memory and after using "session.commit()" that rows goes to the database permanantly
 8.  "mail.send_message(title,sender,recipients=[],body)" this is to send message "recipients are list"
+9.  "session" is very imporatant that it stores key value pair in client cookie and require secret_key to generate session because using that key it 
+    encypts adn decrypts , we can store permanant or temporaray (time-based) sessions 
+10. "url_for()" is imporatant till i know we can use as 3 diff ways 
+    - url_for('static',filename='img/css/js')  -> to access static file
+    - url_for('fn_name' , parameter = p )      -> to access fn inside main.py with parameter if it has 
+    - url_for('fn_name')                       -> to access fn inside main.py 
+11. "redirect()" and "href=''" they append url with current url whether
+    url_for('static',filename="img/jpg,css,js") they creates new url link (means doesnt append in url , creates new link)
 
-
+    
 ---
 
 ### **1. Load `config.json` for Credentials (Security Purpose)**

@@ -15,6 +15,12 @@
         "gmail-port":"465",
         "gmail-server":"smtp.gmail.com",
         "gmail-ssl":"True",
-        "gmail-tsl":"False"
+        "gmail-tsl":"False",
+        "about_text":"Hi My Name is Navnath and i created this , enjoy your blog ",
+
+        "no_of_posts":"5",
+
+        "admin_username":"ndk@gmail.com",
+        "admin_password":"ndk"
     }
 }
