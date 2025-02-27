@@ -14,7 +14,12 @@
                             <h2 class="subheading">{{one_post.sub_heading}}</h2>
                             <span class="meta">
                                 Posted by
-                                <a href="#!">admin</a>
+                                {% if 'user' in session and session['user'] == params['admin_username'] %}
+                                    <a href="">Admin</a> 
+                                {% else %}
+                                    <a href="">User</a>
+                                {% endif %}
+                                on
                                 {{one_post.date}}
                             </span>
                         </div>
@@ -27,10 +32,9 @@
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
                     <div class="col-md-10 col-lg-8 col-xl-7">
-                            {{one_post.content}}
-                            <a href="http://spaceipsum.com/">Space Ipsum</a>
-                            &middot; Images by
-                            <a href="https://www.flickr.com/photos/nasacommons/">NASA on The Commons</a>
+                            <pre>
+                                {{one_post.content | safe }}
+                            </pre>
                         </p>
                     </div>
                 </div>

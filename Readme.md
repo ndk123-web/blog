@@ -7,7 +7,7 @@
 5.  flash messages are important for to print messages , "with messages = get_flashed_messages(with_categories=True)" using these command
     we actually getting all flash messages from flask app 
 6.  "entry = Contacts(name=name,phone_num=phone, email=email, ,msg=message )" , this are imporatant so that we create row instance
-7.  using "session.add(entry) " we temporary stores in memory and after using "session.commit()" that rows goes to the database permanantly
+7.  using "db.session.add(entry) " we temporary stores in memory and after using "db.session.commit()" that rows goes to the database permanantly
 8.  "mail.send_message(title,sender,recipients=[],body)" this is to send message "recipients are list"
 9.  "session" is very imporatant that it stores key value pair in client cookie and require secret_key to generate session because using that key it 
     encypts adn decrypts , we can store permanant or temporaray (time-based) sessions 
@@ -18,7 +18,16 @@
 11. "redirect()" and "href=''" they append url with current url whether
     url_for('static',filename="img/jpg,css,js") they creates new url link (means doesnt append in url , creates new link)
 
-    
+12. Always use "secure_filename" when user upload files into the server (it's inside werkzeug.utils package)
+13. "uuid.uuid4().hex[:32]" maximum 32 bit it creates unique string (it's inside uuid package)
+14. "humanize.naturaltime(date1-date2)" usually converts into the human readable format (it's inside humanize package)
+    ex: 00-00-00 00:01:32 -> 1 minute ago  same as 1 day ago , 1 week ago , 1 year ago  
+15. We were using "db.context() and then db.create_all()" to create table automatically inside database but problem is
+    if we want to add column after this statements then problem occur we again need to drop and then again create so ,
+    solution -> "flash-migrate" package
+        - from flask_migrate import Migrate 
+        - migrate = Migrate(app,db)  -> app is instance of flask and db is instance od database 
+        then -> i. flask db init -> ii. flask db migrate -m "comment" -> iii. flask upgrade 
 ---
 
 ### **1. Load `config.json` for Credentials (Security Purpose)**

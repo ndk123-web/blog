@@ -1,0 +1,84 @@
+{% extends 'main.html' %}
+{% block body %}
+
+<header class="masthead"
+    style="background-image: url('{{ url_for( 'static' , filename = 'assets/img/home-bg.jpg')}}')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <h1>Admin Panel</h1>
+                    <span class="subheading">Manage Posts and change them</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=True) %}
+{% if messages %}
+{% for category, message in messages %}
+
+<div class="alert alert-{{ category }} alert-dismissible fade show"
+    role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"
+        aria-label="Close"></button>
+</div>
+
+{% endfor %}
+{% endif %}
+{% endwith %}
+
+<!-- Main Content -->
+<div class="container px-4 px-lg-5 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h3 class="text-center">Edit Post</h3>
+            <form method="POST" action="{{ url_for('edit' , sno = post.sno ) }}" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" value="{{post.title}}"
+                        class="form-control" id="title" name="title"
+                        placeholder="Enter title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="sub_heading" class="form-label">Sub
+                        Heading</label>
+                    <input type="text" value="{{post.sub_heading}}"
+                        class="form-control" id="sub_heading" name="sub_heading"
+                        placeholder="Enter subheading" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="content" class="form-label">Content</label>
+                    <textarea class="form-control" id="content" name="content"
+                        rows="5" placeholder
+                        required> {{ post.content | trim }} </textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="img_url" class="form-label">Image</label>
+
+                    {% if post.img_url %}
+                    <div class="mb-2">
+                        <img
+                            src="{{ url_for('static', filename='assets/img/' + post.img_url) }}"
+                            alt="Current Image" class="img-thumbnail"
+                            width="150">
+                    </div>
+                    {% else %}
+                    <input type="file" class="form-control" id="img_url"
+                        name="img_url" >
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Edit
+                    Post</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock body %}
