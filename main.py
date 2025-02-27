@@ -135,7 +135,7 @@ def post(post_slug):
     one_post = Posts.query.filter_by(slug=post_slug).first()  # ✅ Single post fetch kar rahe hai
     if not one_post:
         return "Post not found", 404  # ✅ Agar post nahi mili to error return kare
-    return render_template('post.html', params=params, one_post=one_post)  # ✅ Correct variable pass ho raha hai
+    return render_template('post.html', params=params, one_post=one_post, time_ago_converter=time_ago_converter)  # ✅ Correct variable pass ho raha hai
 
 @app.route('/admin_dashboard/',methods=['GET'])
 def admin_dashboard():
