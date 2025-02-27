@@ -86,8 +86,40 @@ def time_ago_converter(date_obj):
 
 @app.route('/')
 def home():
-    posts = Posts.query.order_by(Posts.date.desc()).all()[0:int(params['no_of_posts'])]  # Fetch all
-    return render_template("index.html", params=params, posts=posts, time_ago_converter=time_ago_converter)
+    per_page = int(params['no_of_posts'])  # Number of posts per page
+    page_no = session.get('page_no', 1)  # Default page = 1
+
+    start_idx = (page_no - 1) * per_page
+    end_idx = start_idx + per_page
+    total_posts = Posts.query.count()  # Get total number of posts
+
+    posts = Posts.query.order_by(Posts.date.desc()).all()[start_idx:end_idx]
+
+    return render_template("index.html", params=params, posts=posts, time_ago_converter=time_ago_converter, page_no=page_no,total_posts=total_posts)
+
+
+@app.route('/pagination', methods=['POST'])
+def pagination():
+    per_page = 5  # Number of posts per page
+    page_no = session.get('page_no', 1)  # Default page = 1
+    total_posts = Posts.query.count()  # Get total number of posts
+
+    # Check which button was clicked
+    direction = request.form.get('direction')  
+
+    if direction == "older":
+        page_no += 1  # Move forward in pagination
+    elif direction == "newer" and page_no > 1:
+        page_no -= 1  # Move backward, but not below page 1
+
+    # Update session with new page number
+    session['page_no'] = page_no
+
+    # Calculate post range based on current page
+    start_idx = (page_no - 1) * per_page
+    end_idx = start_idx + per_page
+    posts = Posts.query.order_by(Posts.date.desc()).all()[start_idx:end_idx]
+    return render_template("index.html", posts=posts, page_no=page_no, params=params, total_posts=total_posts, time_ago_converter=time_ago_converter)   
 
 @app.route('/contact/',methods=['GET','POST'])
 def contact():
@@ -140,7 +172,7 @@ def post(post_slug):
 @app.route('/admin_dashboard/',methods=['GET'])
 def admin_dashboard():
     posts = Posts.query.all()
-    return render_template('admin_dashboard.html',params=params,posts=posts)
+    return render_template('admin_dashboard.html',params=params,posts=posts,time_ago_converter=time_ago_converter)
 
 ''' ------------ Imp for uploading file --------------- '''
 
@@ -206,19 +238,19 @@ def login():
     
     # when if 'user' ke is already in cookie then it will immediately redirects to the home 
     if 'user' in session and session['user'] == params['admin_username']:        
-        return render_template('admin_dashboard.html',params=params,posts=posts)
+            return render_template('admin_dashboard.html',params=params,posts=posts,time_ago_converter=time_ago_converter)   
     
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
         if username == params['admin_username'] and password == params['admin_password']:
             session['user'] = username
-            return render_template('admin_dashboard.html',params=params,posts=posts)        
+            return render_template('admin_dashboard.html',params=params,posts=posts,time_ago_converter=time_ago_converter)        
         else:
             flash('U are not admin','danger')
             return redirect(url_for('login'))
     
-    return render_template('login.html',params=params)
+    return render_template('login.html',params=params)  
 
 @app.route('/logout/')
 def logout():
@@ -278,6 +310,41 @@ def createpost():
             return redirect(request.url)
         
     return render_template('create_post.html', post={},params = params)
+
+@app.route('/delete/<string:sno>')
+def delete(sno):
+    
+    req_post = Posts.query.filter_by(sno=sno).first()
+    
+    if not req_post:
+        flash('Post not found','danger')
+        return redirect(url_for('admin_dashboard'))
+    
+    try:
+        db.session.delete(req_post)
+        db.session.commit()
+        flash('successfully deleted post! ','success')
+        return redirect(url_for('admin_dashboard'))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Something messing: {e}','danger')
+        return redirect(url_for('admin_dashboard'))
+
+    all_posts = Posts.query.filter_by().all()
+    return render_template('admin_dashboard.html',params=params,posts=all_posts,time_ago_converter=time_ago_converter)
+
+# @app.route('/pagination/<int:page>/', methods=['GET'])
+# def pagination(page):
+#     per_page = int(params['no_of_posts'])  # Number of posts per page (default = 5)
+    
+#     total_posts = Posts.query.count()  # Total number of posts
+#     start_index = (page - 1) * per_page
+#     end_index = start_index + per_page
+
+#     # Fetch only the required posts
+#     posts = Posts.query.order_by(Posts.date.desc()).all()[start_index:end_index]
+
+    # return render_template("index.html", params=params, posts=posts, page=page, total_posts=total_posts, per_page=per_page)
 
 
 if __name__ == '__main__':
