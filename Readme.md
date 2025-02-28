@@ -1,4 +1,14 @@
-<!-- REQUIREMENTS -->
+<!-- Features -->
+
+1. User can add post with their favourite images 
+
+2. User can also view other's post including admin and other User 
+
+3. 
+
+<!-- Features -->
+
+<!-- What I do in Code in Short -->
 
 1.  load config.json put all credential data into that so that our app becomes secure
 
@@ -62,4 +72,11 @@
 
 21. "time_ago_converted" function which is uses "humanize" module to round up the time like ex- 1 day ago , 1 min ago , 1 week ago
 
-22. 
+22. "app.config['UPLOAD_FILE']" i use to save users images and allowed file is only {'png', 'jpg', 'jpeg', 'gif','webp'} 
+    - using "rsplit()" i am checking whether extension is allowed or not if not then it throws error 
+    - for checking is filename is normal or not for that i used "secure_filename()" from module "werkzeug.utils"
+
+23. For login is for only "admin" so that admin can remove images , changes title , sub_heading , content of any post or blog
+    - For normal user directly can see the blogs but can't change their post i know thats the limitation but i will optimize that  
+
+<!-- What I do in Code in Short -->

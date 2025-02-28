@@ -200,7 +200,7 @@ def allowed_file(filename):
 
 @app.route('/edit/<string:sno>', methods=['GET', 'POST'])
 def edit(sno):
-    if 'user' in session:
+    if 'user' in session and session['user'] == params['admin_username']:
         post = Posts.query.filter_by(sno=sno).first()
         
         if not post:
@@ -236,7 +236,7 @@ def edit(sno):
         
         return render_template('edit.html', params=params, post=post)
     
-    return render_template('login.html')
+    return redirect(url_for('login'))
 
 ''' < ------------- MOST IMPORTANT ------------------> '''
 
@@ -324,24 +324,27 @@ def createpost():
 @app.route('/delete/<string:sno>')
 def delete(sno):
     
-    req_post = Posts.query.filter_by(sno=sno).first()
-    
-    if not req_post:
-        flash('Post not found','danger')
-        return redirect(url_for('admin_dashboard'))
-    
-    try:
-        db.session.delete(req_post)
-        db.session.commit()
-        flash('successfully deleted post! ','success')
-        return redirect(url_for('admin_dashboard'))
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Something messing: {e}','danger')
-        return redirect(url_for('admin_dashboard'))
+    if 'user' in session and session['user'] == params['admin_username']:
+        req_post = Posts.query.filter_by(sno=sno).first()
+        
+        if not req_post:
+            flash('Post not found','danger')
+            return redirect(url_for('admin_dashboard'))
+        
+        try:
+            db.session.delete(req_post)
+            db.session.commit()
+            flash('successfully deleted post! ','success')
+            return redirect(url_for('admin_dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Something messing: {e}','danger')
+            return redirect(url_for('admin_dashboard'))
 
-    all_posts = Posts.query.filter_by().all()
-    return render_template('admin_dashboard.html',params=params,posts=all_posts,time_ago_converter=time_ago_converter)
+        all_posts = Posts.query.filter_by().all()
+        return render_template('admin_dashboard.html',params=params,posts=all_posts,time_ago_converter=time_ago_converter)
+    else:
+        return redirect(url_for('login'))
 
 # @app.route('/pagination/<int:page>/', methods=['GET'])
 # def pagination(page):
