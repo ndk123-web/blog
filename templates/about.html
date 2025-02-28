@@ -1,28 +1,54 @@
 {% extends 'main.html' %}
 
-        {% block body %}
-        <!-- Page Header-->
-        <header class="masthead" style="background-image: url('{{ url_for( 'static' , filename = 'assets/img/about-bg.jpg')}}')">
-            <div class="container position-relative px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-10 col-lg-8 col-xl-7">
-                        <div class="page-heading">
-                            <h1>About Me</h1>
-                            <span class="subheading">{{params["tag_name"]}}</span>
-                        </div>
-                    </div>
+{% block body %}
+<!-- Page Header-->
+<header class="masthead"
+    style="background-image: url('{{ url_for( 'static' , filename = 'assets/img/about-bg.jpg')}}')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="page-heading">
+                    <h1>About Me</h1>
+                    <span class="subheading">{{params["tag_name"]}}</span>
                 </div>
             </div>
-        </header>
-        <!-- Main Content-->
-        <main class="mb-4">
-            <div class="container px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-10 col-lg-8 col-xl-7">
-                       <p>{{params['about_text']}}</p>
-                    </div>
-                </div>
+        </div>
+    </div>
+</header>
+<!-- Main Content-->
+<main class="mb-4">
+    <div class="container px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <p>
+                    🚀 Hey, I'm Navnath Kadam!
+
+                    I'm a passionate Machine Learning & Backend Developer,
+                    exploring the depths of AI, Deep Learning, and Web
+                    Development. I specialize in Django, Python, and Full-Stack
+                    development while continuously leveling up in React,
+                    Next.js, and AI/ML models.
+
+                    💡 I love solving complex problems, optimizing neural
+                    networks, and building real-world applications. From
+                    WebSockets & OAuth to CNNs & Transformers, I enjoy diving
+                    deep into how things work under the hood.
+
+                    🔹 Tech Stack: Django, Python, React, Next.js, PostgreSQL,
+                    AI/ML, NLP, TensorFlow
+                    🔹 Projects: Library Management System, StudyChat App,
+                    AI-Powered Web Apps
+                    🔹 Currently Learning: Advanced AI Models, WebRTC, and
+                    Full-Stack Optimization
+
+                    🚀 Goal: To build scalable AI-driven applications and
+                    contribute to Open Source.
+
+                    📢 Let's connect and explore the future of tech together!
+                    🚀💡</p>
             </div>
-        </main>
-        <!-- Footer-->
-    {% endblock body %}
+        </div>
+    </div>
+</main>
+<!-- Footer-->
+{% endblock body %}
