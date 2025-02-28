@@ -1,9 +1,29 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content />
+    <meta name="author" content />
+    <title>{{params["blog_name"]}}</title>
+    
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename ='assets/logo.png') }}" />
+
+    <style>
+        /* Fixing paragraph formatting */
+        .about-content {
+            white-space: pre-line;
+            line-height: 1.8;
+            text-align: justify;
+        }
+    </style>
+</head>
+
 {% extends 'main.html' %}
 
 {% block body %}
 <!-- Page Header-->
 <header class="masthead"
-    style="background-image: url('{{ url_for( 'static' , filename = 'assets/img/about-bg.jpg')}}')">
+    style="background-image: url('{{ url_for('static', filename='assets/img/about-bg.jpg')}}')">
     <div class="container position-relative px-4 px-lg-5">
         <div class="row gx-4 gx-lg-5 justify-content-center">
             <div class="col-md-10 col-lg-8 col-xl-7">
@@ -15,12 +35,13 @@
         </div>
     </div>
 </header>
+
 <!-- Main Content-->
 <main class="mb-4">
     <div class="container px-4 px-lg-5">
         <div class="row gx-4 gx-lg-5 justify-content-center">
             <div class="col-md-10 col-lg-8 col-xl-7">
-                <p>
+               <p class="about-content">
                     🚀 Hey, I'm Navnath Kadam!
 
                     I'm a passionate Machine Learning & Backend Developer,
@@ -36,16 +57,18 @@
 
                     🔹 Tech Stack: Django, Python, React, Next.js, PostgreSQL,
                     AI/ML, NLP, TensorFlow
+
                     🔹 Projects: Library Management System, StudyChat App,
                     AI-Powered Web Apps
+                    
                     🔹 Currently Learning: Advanced AI Models, WebRTC, and
                     Full-Stack Optimization
 
                     🚀 Goal: To build scalable AI-driven applications and
                     contribute to Open Source.
 
-                    📢 Let's connect and explore the future of tech together!
-                    🚀💡</p>
+                    📢 Let's connect and explore the future of tech together! 🚀💡
+                </p>
             </div>
         </div>
     </div>
