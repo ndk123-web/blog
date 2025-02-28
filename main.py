@@ -9,6 +9,8 @@ from werkzeug.utils import secure_filename
 import uuid
 from flask_migrate import Migrate
 import humanize
+import re 
+import psycopg
 
 # loads config.json as dictionary object of python for security   
 with open('config.json','r') as config_file:
@@ -32,7 +34,7 @@ mail = Mail(app)      # created object of Mail object
 
 # app.config is use for set any configuration related to any work 
 app.config['SECRET_KEY'] = params['secret_key']     # required for flash messages , sessions (encryption and descryption)
-app.config['SQLALCHEMY_DATABASE_URI'] = params['local_url']  # require for database
+app.config['SQLALCHEMY_DATABASE_URI'] = params['prod_url']  # require for database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = params['SQLALCHEMY_TRACK_MODIFICATIONS']  # Warning avoid karne ke liye
 
 db = SQLAlchemy(app)  # created object of database clean_blog
@@ -50,20 +52,20 @@ class Contacts(db.Model):
 
 class Posts(db.Model):
     sno = db.Column(db.Integer, primary_key=True) 
-    title = db.Column(db.String(80), nullable=False) 
-    slug = db.Column(db.String(21), nullable=False, unique=True) 
+    title = db.Column(db.String(255), nullable=False) 
+    slug = db.Column(db.String(255), nullable=False, unique=True) 
     content = db.Column(db.String(5000), nullable=False)  # Increased content length
-    img_url = db.Column(db.String(100), nullable=False)
+    img_url = db.Column(db.String(255), nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)  # Store actual DateTime
-    sub_heading = db.Column(db.String(50), nullable=False)  
+    sub_heading = db.Column(db.String(255), nullable=False)  
     is_admin = db.Column(db.String(10), nullable=False)
     
-# class User(db.Model):
-#     sno = db.Column(db.Integer,primary_key=True) 
-#     username = db.Column(db.String(80),nullable=False) 
-#     password = db.Column(db.String(100), nullable=False) 
-#     date = db.Column(db.String(12))
-#     session = db.Column(db.String(256))
+class User(db.Model):
+    sno = db.Column(db.Integer,primary_key=True) 
+    username = db.Column(db.String(80),nullable=False) 
+    password = db.Column(db.String(100), nullable=False) 
+    date = db.Column(db.String(12))
+    session = db.Column(db.String(256))
 
 # actually it creates table if doesn't exist
 # only using db.create_all() get error context required 
@@ -164,15 +166,23 @@ def normal_post():
 
 @app.route('/post/<string:post_slug>', methods=['GET'])
 def post(post_slug):
-    one_post = Posts.query.filter_by(slug=post_slug).first()  # ✅ Single post fetch kar rahe hai
+    one_post = Posts.query.filter_by(slug=post_slug).first()  # Fetching the post
     if not one_post:
-        return "Post not found", 404  # ✅ Agar post nahi mili to error return kare
-    return render_template('post.html', params=params, one_post=one_post, time_ago_converter=time_ago_converter)  # ✅ Correct variable pass ho raha hai
+        return "Post not found", 404  # Return error if post doesn't exist
+
+    # Use regular expression to match any content between ** and **
+    processed_content = re.sub(r'\*\*(.*?)\*\*', r'<div class="highlight">\1</div>', one_post.content, flags=re.DOTALL)
+
+    # Pass the processed content to the template
+    return render_template('post.html', params=params, one_post=one_post, processed_content=processed_content, time_ago_converter=time_ago_converter)
+
 
 @app.route('/admin_dashboard/',methods=['GET'])
 def admin_dashboard():
-    posts = Posts.query.all()
-    return render_template('admin_dashboard.html',params=params,posts=posts,time_ago_converter=time_ago_converter)
+    if 'user' in session and session['user'] == params['admin_username']:
+        posts = Posts.query.all()
+        return render_template('admin_dashboard.html',params=params,posts=posts,time_ago_converter=time_ago_converter)
+    return redirect(url_for('login'))
 
 ''' ------------ Imp for uploading file --------------- '''
 
@@ -268,7 +278,7 @@ def createpost():
             
             # Date handling
             date = datetime.strptime(date_input, '%Y-%m-%d') if date_input else datetime.now()
-            slug = title + uuid.uuid4().hex[:32] # generates unique ID (first 8 chars)
+            slug = title + uuid.uuid4().hex[:15] # generates unique ID (first 8 chars)
             
             if 'user' in session and session['user'] == params['admin_username']: # if admin 
                 is_admin = 'True'
@@ -346,9 +356,11 @@ def delete(sno):
 
     # return render_template("index.html", params=params, posts=posts, page=page, total_posts=total_posts, per_page=per_page)
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()  # This will create tables if they don't exist
     app.run(debug=True)
+
 
 
 # set FLASK_APP=main.py  -> avoid space

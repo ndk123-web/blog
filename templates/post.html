@@ -1,44 +1,71 @@
-{% extends 'main.html' %}
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ one_post.title }}</title>
+        <style>
+    .highlight {
+        background-color: #333; /* Dark background */
+        color: #f8f8f8; /* Light text for contrast */
+        padding: 15px;
+        border-radius: 8px; /* Rounded corners */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+        margin: 20px 0; /* Increased margin for better spacing */
+        font-family: 'Arial', sans-serif; /* Clean font */
+        line-height: 1.6; /* Better line spacing */
+        white-space: pre-wrap; /* Ensures spaces and newlines are preserved */
+    }
 
-        {% block body %}
-        <!-- Page Header-->
+    .highlight strong {
+        font-weight: bold; /* Bold the inner text for emphasis */
+    }
+</style>
 
-        {% set file = 'assets/img/' +  one_post.img_url %}
-        <header class="masthead" style="background-image: url('{{ url_for( 'static' , filename = file)}}')">
+    </head>
 
-            <div class="container position-relative px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-10 col-lg-8 col-xl-7">
-                        <div class="post-heading">
-                            <h1>{{one_post.title}}</h1>
-                            <h2 class="subheading">{{one_post.sub_heading}}</h2>
-                            <span class="meta">
-                                Posted by
-                                {% if 'user' in session and session['user'] == params['admin_username'] %}
-                                    <a href="">Admin</a> 
-                                {% else %}
-                                    <a href="">User</a>
-                                {% endif %}
-                                on
-                                {{time_ago_converter(one_post.date)}}
-                            </span>
-                        </div>
+    {% extends 'main.html' %}
+
+    {% block body %}
+    <!-- Page Header-->
+
+    {% set file = 'assets/img/' + one_post.img_url %}
+    <header class="masthead"
+        style="background-image: url('{{ url_for( 'static' , filename = file)}}')">
+
+        <div class="container position-relative px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <div class="post-heading">
+                        <h1>{{one_post.title}}</h1>
+                        <h2 class="subheading">{{one_post.sub_heading}}</h2>
+                        <span class="meta">
+                            Posted by
+                            {% if 'user' in session and session['user'] ==
+                            params['admin_username'] %}
+                            <a href>Admin</a>
+                            {% else %}
+                            <a href>User</a>
+                            {% endif %}
+                            on
+                            {{time_ago_converter(one_post.date)}}
+                        </span>
                     </div>
                 </div>
             </div>
-        </header>
-        <!-- Post Content-->
-        <article class="mb-4">
-            <div class="container px-4 px-lg-5">
-                <div class="row gx-4 gx-lg-5 justify-content-center">
-                    <div class="col-md-10 col-lg-8 col-xl-7">
-                            <pre>
-                                {{one_post.content | safe }}
+        </div>
+    </header>
+    <!-- Post Content-->
+    <article class="mb-4">
+        <div class="container px-4 px-lg-5">
+            <div class="row gx-4 gx-lg-5 justify-content-center">
+                <div class="col-md-10 col-lg-8 col-xl-7">
+                    <pre>
+                                {{processed_content | safe }}
                             </pre>
-                        </p>
-                    </div>
-                </div>
+                </p>
             </div>
-        </article>
+        </div>
+    </div>
+</article>
 
-    {% endblock body %}
+{% endblock body %}

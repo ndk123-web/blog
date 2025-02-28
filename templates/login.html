@@ -3,7 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login Form</title>
+        <title>Admin Login TechTales</title>
+
+        <link rel="icon" type="image/x-icon"
+            href="{{ url_for('static',filename ='assets/logo.png') }}" />
 
         <!-- MDB CSS -->
         <link
@@ -53,9 +56,18 @@
             style="min-height: 100vh;">
             <div class="form-container p-4 shadow-lg rounded bg-white"
                 style="width: 400px;">
+
                 <form method="POST" action="{{ url_for('login') }}">
+                    <div class="text-center mb-4">
+                        <!-- Image centered at the top -->
+                        <img
+                            src="{{ url_for('static', filename='assets/logo.png') }}"
+                            alt="Logo" style="width: 50px; height: 50px;">
+                    </div>
+                    <!-- Admin Login Text -->
                     <h3 class="text-center mb-4">Admin Login</h3>
 
+                    <!-- Email input -->
                     <div class="form-outline mb-4">
                         <input type="email" id="form2Example1"
                             class="form-control" name="username" required />
@@ -63,6 +75,7 @@
                             address</label>
                     </div>
 
+                    <!-- Password input -->
                     <div class="form-outline mb-4">
                         <input type="password" id="form2Example2"
                             class="form-control" name="password" required />
@@ -70,11 +83,12 @@
                             for="form2Example2">Password</label>
                     </div>
 
+                    <!-- Submit button -->
                     <input type="submit"
                         class="btn btn-primary btn-block w-100 mb-4"
                         value="Login">
-
                 </form>
+
             </div>
         </div>
 
