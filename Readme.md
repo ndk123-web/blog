@@ -4,7 +4,13 @@
 
 2. User can also view other's post including admin and other User 
 
-3. 
+3.  User & Admin Posting – Users can create posts, but only the admin can edit/delete.
+
+4. Anonymous Posting – Posts are visible to all, but authors stay hidden.
+
+5.  Responsive UI – Designed with Bootstrap for a clean look.
+
+6.  Cloud Hosted – Deployed on Render with PostgreSQL.
 
 <!-- Features -->
 
