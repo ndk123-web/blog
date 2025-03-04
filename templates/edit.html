@@ -64,7 +64,7 @@
                     {% if post.img_url %}
                     <div class="mb-2">
                         <img
-                            src="{{ url_for('static', filename='assets/img/' + post.img_url) }}"
+                            src="{{ post.img_url }}"
                             alt="Current Image" class="img-thumbnail"
                             width="150">
                     </div>

@@ -1,3 +1,5 @@
+
+### In Short what are the features of TechTales  
 <!-- Features -->
 
 1. User can add post with their favourite images 
@@ -15,6 +17,8 @@
 <!-- Features -->
 
 <!-- What I do in Code in Short -->
+
+### In Short What is in Code 
 
 1.  load config.json put all credential data into that so that our app becomes secure
 
@@ -84,5 +88,9 @@
 
 23. For login is for only "admin" so that admin can remove images , changes title , sub_heading , content of any post or blog
     - For normal user directly can see the blogs but can't change their post i know thats the limitation but i will optimize that  
+
+24. So , Problem is whenever render Server sleeps then whatever the images uploaded by users that get vanished
+    - So i used cloud file stoarage to store user images using " DropBox " 
+    - DropBox Automatically Saves clients data and it is slow but images are rendering even render servers goes to sleep
 
 <!-- What I do in Code in Short -->

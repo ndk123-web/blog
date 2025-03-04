@@ -11,6 +11,7 @@ from flask_migrate import Migrate
 import humanize
 import re 
 import psycopg
+import dropbox
 
 # loads config.json as dictionary object of python for security   
 with open('config.json','r') as config_file:
@@ -18,6 +19,11 @@ with open('config.json','r') as config_file:
 
 # Flask object create kiya 
 app = Flask(__name__) # using this flask knows where is the module is 
+
+DROPBOX_ACCESS_TOKEN = params['DROPBOX_ACCESS_TOKEN']  # Replace with your actual token
+DROPBOX_FOLDER_PATH = "/TechTales_Images/"  # Folder inside Dropbox
+
+dbx = dropbox.Dropbox(DROPBOX_ACCESS_TOKEN)
 
 # app.config is use for set any configuration related to any work 
 app.config.update(
@@ -34,7 +40,7 @@ mail = Mail(app)      # created object of Mail object
 
 # app.config is use for set any configuration related to any work 
 app.config['SECRET_KEY'] = params['secret_key']     # required for flash messages , sessions (encryption and descryption)
-app.config['SQLALCHEMY_DATABASE_URI'] = params['prod_url']  # require for database
+app.config['SQLALCHEMY_DATABASE_URI'] = params['local_url']  # require for database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = params['SQLALCHEMY_TRACK_MODIFICATIONS']  # Warning avoid karne ke liye
 
 db = SQLAlchemy(app)  # created object of database clean_blog
@@ -202,41 +208,46 @@ def allowed_file(filename):
 def edit(sno):
     if 'user' in session and session['user'] == params['admin_username']:
         post = Posts.query.filter_by(sno=sno).first()
-        
+
         if not post:
             flash('Post not found!', 'danger')
             return redirect(url_for('admin_dashboard'))
-        
+
         if request.method == 'POST':
             try:
                 post.title = request.form.get('title')
                 post.sub_heading = request.form.get('sub_heading')
                 post.content = request.form.get('content')
 
+                # Preserve old image by default
+                img_url = post.img_url  
+
                 # Check if a new image is uploaded
                 if 'img_url' in request.files and request.files['img_url'].filename != '':
                     file = request.files['img_url']
 
                     if file and allowed_file(file.filename):
-                        if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                            os.makedirs(app.config['UPLOAD_FOLDER'])
-
-                        filename = secure_filename(file.filename)
-                        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                        file.save(file_path)
-                        post.img_url = filename  # Update image filename in DB
+                        new_img_url = upload_to_dropbox(file)
+                        
+                        if new_img_url:
+                            img_url = new_img_url  # Use new image if upload succeeds
+                        else:
+                            flash("Failed to upload image. Retaining the old image.", "warning")
+                    
+                post.img_url = img_url  # Keep the correct image
 
                 db.session.commit()
                 flash('Successfully updated the post', 'success')
-                return redirect(url_for('home'))  # Reload page after update
-            
+                return redirect(url_for('home'))  # Redirect after update
+
             except Exception as e:
                 db.session.rollback()
                 flash(f'Some error occurred: {str(e)}', 'danger')
-        
+
         return render_template('edit.html', params=params, post=post)
-    
+
     return redirect(url_for('login'))
+
 
 ''' < ------------- MOST IMPORTANT ------------------> '''
 
@@ -267,7 +278,42 @@ def logout():
     session.pop('user')
     return redirect(url_for('login'))
 
-@app.route('/createpost/',methods=['GET','POST'])
+def upload_to_dropbox(file):
+    
+    # secure the filename means it removes harmful names like '/'
+    filename = secure_filename(file.filename)
+    
+    # it sets dropbox path where the actual image will be going to send 
+    dropbox_path = f"{DROPBOX_FOLDER_PATH}{filename}"
+    
+    try:
+        # Upload file.read() sending bytes and that will store in dropbox_path
+        # if image already exist then it overwrites instead of error 
+        dbx.files_upload(file.read(), dropbox_path, mode=dropbox.files.WriteMode("overwrite"))
+        
+        # returns list of sharing list for that path of image
+        shared_links = dbx.sharing_list_shared_links(path=dropbox_path).links
+        
+        # if for that image link is already exist then that link we will be going to use 
+        if shared_links:
+            link = shared_links[0].url  # Use existing link
+            
+        # if not exist then we are creating new link for that image
+        else:
+            link_metadata = dbx.sharing_create_shared_link_with_settings(dropbox_path)
+            link = link_metadata.url
+        
+        # dropbox.com donot give direct image link because of dl=0 
+        # we need to replace dropbox with dl.dropboxusercontent to get direct image link 
+        # and that link we are going to store inside the img_url database 
+        direct_link = link.replace("www.dropbox.com", "dl.dropboxusercontent.com").replace("?dl=0", "")
+        return direct_link
+
+    except dropbox.exceptions.ApiError as e:
+        print(f"Dropbox API error: {e}")
+        return None
+
+@app.route('/createpost/', methods=['GET', 'POST'])
 def createpost():
     if request.method == 'POST':
         try:
@@ -276,50 +322,39 @@ def createpost():
             content = request.form.get('content')
             date_input = request.form.get('date')
             
-            # Date handling
             date = datetime.strptime(date_input, '%Y-%m-%d') if date_input else datetime.now()
-            slug = title + uuid.uuid4().hex[:15] # generates unique ID (first 8 chars)
+            slug = title[0:5] + uuid.uuid4().hex[:15]  # Unique slug
             
-            if 'user' in session and session['user'] == params['admin_username']: # if admin 
-                is_admin = 'True'
+            is_admin = 'True' if 'user' in session and session['user'] == params['admin_username'] else 'False'
+            
+            # if user do not uploaded the image then image will be default 
+            if 'img_url' not in request.files or request.files['img_url'].filename == '':
+                flash('Image not sent. Using default image.', 'warning')
+                img_url = "/static/assets/img/about-bg.jpg"  # Default image
+            
+            # if user selects the image then that image will be process by function upload_to_dropbox  
             else:
-                is_admin = 'False'
-            
-            # File Handling
-            if 'img_url' not in request.files:
-                flash('Image not sent', 'danger')
-                return redirect(request.url)
-
-            file = request.files['img_url']
-            
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                upload_path = app.config['UPLOAD_FOLDER']
+                file = request.files['img_url']
+                img_url = upload_to_dropbox(file)  # Upload & get URL
                 
-                # Ensure upload folder exists
-                if not os.path.exists(upload_path):
-                    os.makedirs(upload_path)
+                if not img_url:
+                    flash("Failed to upload image. Using default.", "danger")
+                    img_url = "/static/assets/img/about-bg.jpg"
 
-                filepath = os.path.join(upload_path, filename)
-                file.save(filepath)
-            else:
-                flash("Invalid file format. Using default image.", "danger")
-                filename = "about-bg.jpg"
-                filepath = os.path.join(os.getcwd(),"static", "assets", "img", filename)
-            
-            # Save to database
-            entry = Posts(title=title, sub_heading=sub_heading, content=content, date=date, img_url=filename ,slug = slug ,is_admin=is_admin)
+            # 🔹 Save to Database
+            entry = Posts(title=title, sub_heading=sub_heading, content=content, date=date, img_url=img_url, slug=slug, is_admin=is_admin)
             db.session.add(entry)
             db.session.commit()
-            flash('Successfully created', 'success')
-            return redirect(url_for('home'))  # Redirect to home or blog list page
             
+            flash('Post successfully created!', 'success')
+            return redirect(url_for('home'))
+        
         except Exception as e:
             db.session.rollback()
             flash(f'Something went wrong: {str(e)}', 'danger')
             return redirect(request.url)
         
-    return render_template('create_post.html', post={},params = params)
+    return render_template('create_post.html', post={}, params=params)
 
 @app.route('/delete/<string:sno>')
 def delete(sno):
