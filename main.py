@@ -40,7 +40,7 @@ mail = Mail(app)      # created object of Mail object
 
 # app.config is use for set any configuration related to any work 
 app.config['SECRET_KEY'] = params['secret_key']     # required for flash messages , sessions (encryption and descryption)
-app.config['SQLALCHEMY_DATABASE_URI'] = params['local_url']  # require for database
+app.config['SQLALCHEMY_DATABASE_URI'] = params['prod_url']  # require for database
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = params['SQLALCHEMY_TRACK_MODIFICATIONS']  # Warning avoid karne ke liye
 
 db = SQLAlchemy(app)  # created object of database clean_blog
